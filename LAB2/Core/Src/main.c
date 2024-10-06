@@ -51,6 +51,7 @@ void SystemClock_Config(void);
 static void MX_TIM2_Init(void);
 static void MX_GPIO_Init(void);
 void display7SEG(int num);
+void update7SEG(int index);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -227,7 +228,78 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+const int MAX_LED = 4;
+int led_buffer[4] = {1, 2, 3, 4};
 
+void update7SEG(int index) {
+    switch (index) {
+        case 0:
+
+            HAL_GPIO_WritePin(GPIOA, EN0_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(GPIOA, EN1_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOA, EN2_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOA, EN3_Pin, GPIO_PIN_SET);
+
+            display7SEG(led_buffer[0]);
+            break;
+
+        case 1:
+
+            HAL_GPIO_WritePin(GPIOA, EN0_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOA, EN1_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(GPIOA, EN2_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOA, EN3_Pin, GPIO_PIN_SET);
+
+            display7SEG(led_buffer[1]);
+            break;
+
+        case 2:
+
+            HAL_GPIO_WritePin(GPIOA, EN0_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOA, EN1_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOA, EN2_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(GPIOA, EN3_Pin, GPIO_PIN_SET);
+
+            display7SEG(led_buffer[2]);
+            break;
+
+        case 3:
+
+            HAL_GPIO_WritePin(GPIOA, EN0_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOA, EN1_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOA, EN2_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOA, EN3_Pin, GPIO_PIN_RESET);
+
+            display7SEG(led_buffer[3]);
+            break;
+
+        default:
+
+            break;
+    }
+}
+
+
+
+int index_led = 0;
+int count = 50;
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim->Instance == TIM2) {
+        if (count > 0) {
+            count--;
+        }
+
+        if (count <= 0) {
+            count = 50;
+            update7SEG(index_led);
+            index_led++;
+            if (index_led >= MAX_LED) {
+                index_led = 0;
+            }
+        }
+    }
+}
 void display7SEG(int num)
 {
 
