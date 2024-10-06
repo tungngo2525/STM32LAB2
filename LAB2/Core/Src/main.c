@@ -282,21 +282,37 @@ void update7SEG(int index) {
 
 
 int index_led = 0;
-int count = 50;
+int count = 25;
+int dot_count = 100;
+int dot_state = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM2) {
+
         if (count > 0) {
             count--;
         }
-
         if (count <= 0) {
-            count = 50;
+            count = 25;
+
             update7SEG(index_led);
+
             index_led++;
             if (index_led >= MAX_LED) {
                 index_led = 0;
             }
+        }
+
+        if (dot_count > 0) {
+            dot_count--;
+        }
+        if (dot_count <= 0) {
+            dot_count = 100;
+
+            dot_state = !dot_state;
+
+
+            HAL_GPIO_WritePin(GPIOA, DOT_Pin, (dot_state) ? GPIO_PIN_SET : GPIO_PIN_RESET);
         }
     }
 }
