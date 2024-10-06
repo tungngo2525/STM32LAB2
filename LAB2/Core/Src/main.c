@@ -230,7 +230,7 @@ static void MX_GPIO_Init(void)
 
 void display7SEG(int num)
 {
-    // Segment values for digits 0-9 (active-low: 0 turns ON the segment)
+
     uint8_t segment_map[10] = {
         0b11000000, // 0: a, b, c, d, e, f
         0b11111001, // 1: b, c
@@ -244,55 +244,19 @@ void display7SEG(int num)
         0b10010000  // 9: a, b, c, d, f, g
     };
 
-    // Clear the current output on PB0-PB6
+
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6, GPIO_PIN_SET);
 
-    // Write the segments to the 7-segment display
-    for (int i = 0; i < 7; i++)
+        for (int i = 0; i < 7; i++)
     {
-        // Check if the segment should be ON or OFF
+
         GPIO_PinState pin_state = (segment_map[num] & (1 << i)) ? GPIO_PIN_SET : GPIO_PIN_RESET;
 
-        // Set the corresponding pin
+
         HAL_GPIO_WritePin(GPIOB, (1 << i), pin_state);
     }
 }
-int count = 100;
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-    static uint8_t display_toggle = 0; // Toggle variable to switch between displays
-  if(count> 0){
-	  count--;
-  if(count <= 0){
-	  count = 50;
 
-    if (htim->Instance == TIM2) {
-
-        switch (display_toggle) {
-            case 0:
-                // Enable the first 7-segment display (EN0 active)
-                HAL_GPIO_WritePin(GPIOA, EN0_Pin, GPIO_PIN_RESET);   // Activate first display
-                HAL_GPIO_WritePin(GPIOA, EN1_Pin, GPIO_PIN_SET); // Deactivate second display
-
-                // Display number "1" on the first 7-segment display
-                display7SEG(1);
-                break;
-
-            case 1:
-                // Enable the second 7-segment display (EN1 active)
-                HAL_GPIO_WritePin(GPIOA, EN0_Pin, GPIO_PIN_SET); // Deactivate first display
-                HAL_GPIO_WritePin(GPIOA, EN1_Pin, GPIO_PIN_RESET);   // Activate second display
-
-                // Display number "2" on the second 7-segment display
-                display7SEG(2);
-                break;
-        }
-
-        // Toggle the display
-        display_toggle = !display_toggle;
-    }
-  }
-}
-}
 /* USER CODE END 4 */
 
 /**
