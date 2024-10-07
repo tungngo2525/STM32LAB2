@@ -80,6 +80,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
   int hour = 15 , minute = 8 , second = 50;
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -100,6 +101,10 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   setTimer0(1000);
+  setTimer1(250);
+  setTimer2(1000);
+  int index_led = 0;
+  int dot_state = 0;
   while (1)
   {
     /* USER CODE END WHILE */
@@ -115,13 +120,32 @@ int main(void)
     	minute = 0;
     	hour++;
     }
-    if(hour>= 20){
+    if(hour>= 24){
     	hour = 0;
     }
     updateClockBuffer( hour,  minute);
 
     /* USER CODE BEGIN 3 */
   }
+	if(timer1_flag == 1) {
+	        setTimer1(250);
+	        update7SEG(index_led);
+	        index_led++;
+	        if (index_led >= MAX_LED) {
+	            index_led = 0;
+	        }
+	    }
+
+
+
+
+
+	if(timer2_flag == 1) {
+	    setTimer2(1000);  // Keep using timer1 since you are checking timer1_flag
+
+	    dot_state = !dot_state;  // Toggle dot state
+	    HAL_GPIO_WritePin(GPIOA, DOT_Pin, (dot_state) ? GPIO_PIN_SET : GPIO_PIN_RESET);  // Update DOT state
+	}
  }
 
   /* USER CODE END 3 */
@@ -301,41 +325,12 @@ void update7SEG(int index) {
 }
 
 
-
-
-int index_led = 0;
-int count = 25;
-int dot_count = 100;
-int dot_state = 0;
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-    if (htim->Instance == TIM2) {
-        timerRun();
-        if (count > 0) {
-            count--;
-        }
-        if (count <= 0) {
-            count = 25;
-
-            update7SEG(index_led);
-
-            index_led++;
-            if (index_led >= MAX_LED) {
-                index_led = 0;
-            }
-        }
-
-        if (dot_count > 0) {
-            dot_count--;
-        }
-        if (dot_count <= 0) {
-            dot_count = 100;
-
-            dot_state = !dot_state;
-            HAL_GPIO_WritePin(GPIOA, DOT_Pin, (dot_state) ? GPIO_PIN_SET : GPIO_PIN_RESET);
-        }
-    }
+    timerRun0();
+    timerRun1();
+    timerRun2();
 }
+
 
 
 
