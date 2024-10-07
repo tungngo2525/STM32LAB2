@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include  "software_timer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,9 +99,13 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  setTimer0(1000);
   while (1)
   {
     /* USER CODE END WHILE */
+	if(timer0_flag == 1){
+		setTimer0(1000);
+
     second++;
     if(second >= 60){
     	second = 0;
@@ -115,9 +119,11 @@ int main(void)
     	hour = 0;
     }
     updateClockBuffer( hour,  minute);
-    HAL_Delay(1000);
+
     /* USER CODE BEGIN 3 */
   }
+ }
+
   /* USER CODE END 3 */
 }
 
@@ -295,6 +301,8 @@ void update7SEG(int index) {
 }
 
 
+
+
 int index_led = 0;
 int count = 25;
 int dot_count = 100;
@@ -302,7 +310,7 @@ int dot_state = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM2) {
-
+        timerRun();
         if (count > 0) {
             count--;
         }
@@ -332,13 +340,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 
 void updateClockBuffer(int hour, int minute) {
-    // Handle hours
-    led_buffer[0] = hour / 10;   // Tens digit of the hour
-    led_buffer[1] = hour % 10;   // Ones digit of the hour
 
-    // Handle minutes
-    led_buffer[2] = minute / 10; // Tens digit of the minute
-    led_buffer[3] = minute % 10; // Ones digit of the minute
+    led_buffer[0] = hour / 10;
+    led_buffer[1] = hour % 10;
+
+
+    led_buffer[2] = minute / 10;
+    led_buffer[3] = minute % 10;
 }
 void display7SEG(int num)
 {
