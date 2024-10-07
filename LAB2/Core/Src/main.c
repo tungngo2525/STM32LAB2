@@ -115,7 +115,7 @@ int main(void)
     	minute = 0;
     	hour++;
     }
-    if(hour>= 20){
+    if(hour>= 24){
     	hour = 0;
     }
     updateClockBuffer( hour,  minute);
