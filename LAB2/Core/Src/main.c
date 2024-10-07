@@ -32,6 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define MAX_LED 4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,6 +53,7 @@ static void MX_TIM2_Init(void);
 static void MX_GPIO_Init(void);
 void display7SEG(int num);
 void update7SEG(int index);
+void updateClockBuffer(int hour, int minute);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -77,7 +79,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  int hour = 15 , minute = 8 , second = 50;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -100,7 +102,20 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+    second++;
+    if(second >= 60){
+    	second = 0;
+    	minute++;
+    }
+    if(minute>=60){
+    	minute = 0;
+    	hour++;
+    }
+    if(hour>= 20){
+    	hour = 0;
+    }
+    updateClockBuffer( hour,  minute);
+    HAL_Delay(1000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -228,7 +243,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-const int MAX_LED = 4;
+int led_buffer[MAX_LED];
 int led_buffer[4] = {1, 2, 3, 4};
 
 void update7SEG(int index) {
@@ -280,25 +295,50 @@ void update7SEG(int index) {
 }
 
 
-
 int index_led = 0;
-int count = 50;
+int count = 25;
+int dot_count = 100;
+int dot_state = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM2) {
+
         if (count > 0) {
             count--;
         }
-
         if (count <= 0) {
-            count = 50;
+            count = 25;
+
             update7SEG(index_led);
+
             index_led++;
             if (index_led >= MAX_LED) {
                 index_led = 0;
             }
         }
+
+        if (dot_count > 0) {
+            dot_count--;
+        }
+        if (dot_count <= 0) {
+            dot_count = 100;
+
+            dot_state = !dot_state;
+            HAL_GPIO_WritePin(GPIOA, DOT_Pin, (dot_state) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+        }
     }
+}
+
+
+
+void updateClockBuffer(int hour, int minute) {
+    // Handle hours
+    led_buffer[0] = hour / 10;   // Tens digit of the hour
+    led_buffer[1] = hour % 10;   // Ones digit of the hour
+
+    // Handle minutes
+    led_buffer[2] = minute / 10; // Tens digit of the minute
+    led_buffer[3] = minute % 10; // Ones digit of the minute
 }
 void display7SEG(int num)
 {
